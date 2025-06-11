@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Valls Champions SOP</title>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Raleway', sans-serif;
+      background-color: #efc000;
+      color: white;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .cabecera-img {
+      width: 100%;
+      max-width: 1300px;
+      height: auto;
+      display: block;
+      margin: 0 auto 30px auto;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    .question {
+      margin-bottom: 20px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .correct {
+      color: #00ff00;
+      font-weight: bold;
+    }
+
+    .incorrect {
+      color: #ff0000;
+      font-weight: bold;
+    }
+
+    .center {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+      max-width: 300px;
+      text-align: center;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: white;
+      color: #efc000;
+      border: none;
+      font-weight: bold;
+    }
+
+    #timer {
+      text-align: center;
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .pregunta {
+      font-weight: 700;
+    }
+
+    .respuesta {
+      font-weight: 400;
+    }
+
+    .resultado-final {
+      background-color: white;
+      color: black;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 30px;
+    }
+
+    .resultado-final h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    .respuesta-correcta {
+      color: #006400;
+      font-weight: bold;
+    }
+
+    .respuesta-incorrecta {
+      color: #8B0000;
+      font-weight: bold;
+    }
+
+    .resultado-final ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    #verResultadoBtn {
+      display: none;
+      margin: 20px auto;
+    }
+  </style>
+</head>
+<body>
+  <img src="cabecera.gif" alt="Cabecera" class="cabecera-img">
+  <h1>Semifinal Valls Champions SOP</h1>
+
+  <div id="intro">
+    <h2>Introduce tu nombre para comenzar:</h2>
+    <div class="center">
+      <input type="text" id="playerName" required placeholder="Tu nombre">
+    </div>
+    <div class="center">
+      <button onclick="startQuiz()">Empezar</button>
+    </div>
+  </div>
+
+  <div id="timer" class="hidden">Tiempo: 0 segundos</div>
+  <div class="center"><button id="verResultadoBtn" onclick="mostrarResultados()">Conoce tu resultado</button></div>
+
+  <form id="quizForm" class="hidden">
+    <button type="submit" style="display: none;">Enviar</button>
+  </form>
+
+  <div id="results"></div>
+
+  <script>
+    const questions = [
+      {
+        q: "¿Se instruye a todos/as los/as colaboradores/as, mediante charlas sobre seguridad, concienciación acerca de amenazas y formación sobre planes de acción de emergencia?",
+        options: ["Si", "No", "Entrega unas instrucciones"],
+        answer: 0
+      },
+      {
+        q: "Que altura mínima tiene que tener el hueco del paper palet para poder introducir las palas sin ocasionar daños",
+        options: ["35mm", "40mm", "45mm"],
+        answer: 2
+      },
+      {
+        q: "Los pines de seguridad de los beam's solo son necesarios en el primer nivel de la estantería.",
+        options: ["Correcto", "Falso, son necesarios en todos los niveles", "En el primer y sexto nivel"],
+        answer: 1
+      },
+      {
+        q: "¿Dónde deben estacionarse las carretillas elevadoras defectuosas?",
+        options: ["Las carretillas elevadoras defectuosas deben estacionarse en el taller de mantenimiento", "Las carretillas defectuosas deben estacionarse, bloquearse, etiquetarse y avisar al TL", "Las respuestas A y B son correctas"],
+        answer: 1
+      },
+      {
+        q: "¿A que contenedores deben medir los gases en barrera?",
+        options: ["A los contenedores marítimos llenos", "A los contenedores marítimos vacíos", "Ambas respuestas son correctas"],
+        answer: 2
+      },
+      {
+        q: "Estacionamiento para proceder a la carga batería de retráctil y recogepedidos:",
+        options: ["Se llega a la zona de estacionemiento, se aparca en el hueco que veamos libre", "Se llega a la zona de estacionamiento, las recogepedidos tienen plazas nuemradas, en el caso de las retráctiles se aparca en el hueco que veamos libre.", "Se llega a la zona de estacionamiento, se aparca en el hueco asignado para la máquina, todas están numeradas"],
+        answer: 2
+      },
+      {
+        q: "¿Qué documento debe utilizarse para los envíos entre almacenes en Europa?",
+        options: ["Carta de Portes", "CMR", "Albarán"],
+        answer: 1
+      },
+      {
+        q: "Si veo un taco suelto en medio de un pasillo o en playa carga o descarga, qué hago?",
+        options: ["Lo miro y espero a que lo recoja el personal de limpieza", "Espero a acabar de cargar o descargar para recogerlo.", "Lo recojo inmediatamente."],
+        answer: 2
+      }
+    ];
+
+    let timer = 0;
+    let interval;
+
+    function startQuiz() {
+      const nameInput = document.getElementById('playerName');
+      if (nameInput.value.trim() === '') {
+        alert('Por favor, introduce tu nombre.');
+        return;
+      }
+
+      document.getElementById('intro').classList.add('hidden');
+      document.getElementById('quizForm').classList.remove('hidden');
+      document.getElementById('timer').classList.remove('hidden');
+
+      interval = setInterval(() => {
+        timer++;
+        document.getElementById('timer').innerText = `Tiempo: ${timer} segundos`;
+      }, 1000);
+
+      const form = document.getElementById('quizForm');
+
+      questions.forEach((q, idx) => {
+        const div = document.createElement('div');
+        div.className = 'question';
+        div.innerHTML = `<p class="pregunta">${idx + 1}. ${q.q}</p>` +
+          q.options.map((opt, i) =>
+            `<label class="respuesta"><input type="radio" name="q${idx}" value="${i}" required> ${opt}</label><br>`
+          ).join('');
+        form.insertBefore(div, form.lastElementChild);
+      });
+
+      const lastQuestionInputs = document.getElementsByName(`q${questions.length - 1}`);
+      lastQuestionInputs.forEach(input => {
+        input.addEventListener('change', () => {
+          clearInterval(interval);
+          document.getElementById('quizForm').classList.add('hidden');
+          document.getElementById('verResultadoBtn').style.display = 'block';
+        });
+      });
+    }
+
+    function mostrarResultados() {
+      let score = 0;
+      let resultadoHTML = `<div class="resultado-final"><h2>Conoce tu resultado</h2><ul>`;
+
+      questions.forEach((q, idx) => {
+        const selectedInput = document.querySelector(`input[name="q${idx}"]:checked`);
+        const selected = selectedInput ? selectedInput.value : -1;
+        const correcto = parseInt(selected) === q.answer;
+        if (correcto) score++;
+
+        resultadoHTML += `<li><strong>${idx + 1}. ${q.q}</strong><br><span class="${correcto ? 'respuesta-correcta' : 'respuesta-incorrecta'}">${q.options[selected]} ${correcto ? '✅' : '❌'}</span></li><br>`;
+      });
+
+      resultadoHTML += `</ul><p><strong>Tiempo empleado:</strong> ${timer} segundos | Respuestas correctas: ${score}/${questions.length}</p></div>`;
+
+      document.getElementById('verResultadoBtn').style.display = 'none';
+      document.getElementById('timer').classList.add('hidden');
+      document.getElementById('results').innerHTML = resultadoHTML;
+    }
+  </script>
+</body>
+</html>
